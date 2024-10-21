@@ -3,15 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Command Output</title>
+    <title>Terminal Simulation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body { 
+            margin: 0; 
+            background-color: #7493a8;
+            min-height: 100vh;
+        }
+
+        .root {
+            padding-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .computerContainer {
+            width: 500px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            background-color: #b9ab84;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .bottomDecor {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .bottomButton {
+            height: 40px;
+            width: 10px;
+            flex: 0 0 100px;
+            margin: 10px;
+            border-radius: 10px;
+            border: 2px solid #222;
+            position: relative;
+        }
+        .bottomButton::after {
+            content: '';
+            height: 75%;
+            right: 3px;
+            background-color: #222;
+            width: 25px;
+            position: absolute;
+            margin: 4px 4px;
+            border-radius: 4px;
+        }
+
+        .screenContainer {
+            flex: 0 0 63%;
+            border-radius: 20px 20px 0 0;
+            background: #cfc19a;
+            padding: 25px;
+        }
+
+        .screenFrame {
+            height: 100%;
+            background-color: #b9ab84;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-radius: 20px 20px;
+        }
+
+        .screen {
+            background-color: #222;
+            height: 90%;
+            width: 90%;
+            margin: 18px 0;
+            border-radius: 235px / 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bodyDecor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #cfc19a;
+            border-radius: 0 0 24px 24px;
+            padding: 10px 30px;
+        }
+
+        .floppyDriveContainer {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+
+        .logoContainer {
+            flex: 1;
+        }
+
+        .floppyDrive {
+            position: relative;
+            margin-bottom: 35px;
+        }
+
+        .floppySlot {
+            height: 8px;
+            width: 208px;
+            background-color: #222;
+            position: absolute;
+            right: 29px;
+        }
+        .floppyShade {
+            height: 45px;
+            width: 119px;
+            background-color: #b9ab84;
+            position: absolute;
+            top: -20px;
+            right: 0;
+            border-radius: 3px;
+        }
+        .floppyShadeDarker {
+            height: 37px;
+            width: 101px;
+            background-color: #988b73;
+            position: absolute;
+            top: -16px;
+            right: 11px;
+            border-radius: 4px;
+        }
+
+        .logo {
+  border: 1px solid #222;
+  width: 35px;
+  height: 35px;
+  border-radius: 5px;
+  background-size: 159%;
+  background-position: 46% 41%;
+  background-image: url(https://i.imgur.com/B5eWZ33.png)
+}
+
+        .terminal {
+            height: 245px;
+            flex: 0 0 95%;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        .terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+        .terminal::-webkit-scrollbar-track {
+            border-radius: 10px;
+        }
+        .terminal::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            background-color: #00fe00;
+        }
+
+        .currentLine {
+            margin: 0 10px;
+            line-height: 1.2;
+            display: flex;
+        }
+
+        .prompt {
+            color: #00fe00;
+            font-family: monospace;
+            line-height: 1.2;
+            margin-right: 5px;
+        }
+
+        .inputContainer {
+            flex: 1;
+        }
+
+        .input {
+            border: none;
+            padding: 0;
+            margin: 0;
+            background: #222;
+            color: #00fe00;
+            width: 99%;
+            font-family: monospace;
+            font-size: 12px;
+            margin-left: 2px;
+        }
+        .input:focus {
+            outline: 0;
+        }
+
+        .output {
+            color: #00fe00;
+            font-family: monospace;
+            margin: 0;
+            line-height: 1.2;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
+        .outputContainer {
+            margin: 0 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Command Output</h1>
+  <div class="root">
+    <main class="computerContainer">
+      <section class="screenContainer">
+        <div class="screenFrame">
+          <div class="screen">
+            <div class="terminal">
+              <div class="outputContainer">
+                <!-- output appears here-->
+              </div>
+              <div class="currentLine">
+                <span class="prompt">$</span>
+                <div class="inputContainer">
+                  <input class="input" type="text" autofocus/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="bodyDecor">
+        <div class="floppyDriveContainer">
+          <div class="floppyDrive">
+            <div class="floppyShade"></div>
+            <div class="floppyShadeDarker"></div>
+            <div class="floppySlot"></div>
+          </div>
+        </div>
+        <div class="logoContainer">
+          <div class="logo"></div>
+        </div>
+      </section>
+      <section class="bottomDecor">
+        <div class="bottomButton"></div>
+      </section>
+    </main>
+  </div>
+  <h1 id="myHeader" hidden>{{ command_output.stdout }}</h1>
+  <script>
+            // Get the h1 element by its ID
+            const headerElement = document.getElementById('myHeader');
+        
+        // Read the text content of the h1 tag
+        const headerText = headerElement.textContent;
+    const ENTER_KEY = 13;
+    const fileSystem = {
+      'README.md': `Welcome to the Macintosh 128K terminal!
+\n$ ${headerText}`,
+  
+    }
 
-    <h2>Standard Output:</h2>
-    <pre>{{ command_output.stdout }}</pre>
+    new class Terminal {
+      constructor() {
+        this.onKeyDown = this.onKeyDown.bind(this);
+        this.clearHistory = this.clearHistory.bind(this);
+        this.addHistory = this.addHistory.bind(this);
+        this.listFiles = this.listFiles.bind(this);
+        this.catFile = this.catFile.bind(this);
+        this.scrollToBottom = this.scrollToBottom.bind(this);
 
-    <h2>Error Output:</h2>
-    <pre>{{ command_output.stderr }}</pre>
+        this.history = [];
+        this.elements = {
+          input: document.querySelector('.input'),
+          terminal: document.querySelector('.terminal'),
+          outputContainer: document.querySelector('.outputContainer')
+        };
+        this.prompt = '$';
+        this.commands = {
+          clear: this.clearHistory,
+          ls: this.listFiles,
+          cat: this.catFile,
+        };
+        this.elements.input.addEventListener('keydown', this.onKeyDown);
+        this.catFile('README.md');
+      }
+      
+      clearHistory() {
+        this.history = [];
+        this.elements.outputContainer.innerHTML = '';
+      }
+      
+      catFile(fileName) {
+        if (fileName in fileSystem) 
+          this.addHistory(fileSystem[fileName]);
+        else 
+          this.addHistory(`cat: ${fileName}: No such file or directory`);
+      }
+      
+      scrollToBottom() {
+        this.elements.terminal.scrollTop = this.elements.terminal.scrollHeight;
+      }
+      
+      addHistory(output) {
+        this.history.push(output);
+   
+        var outputText = document.createTextNode(output);
+        let outputEl = document.createElement('pre');
+        
+        outputEl.classList.add('output');
+        outputEl.appendChild(outputText);
+        
+        this.elements.outputContainer.appendChild(outputEl);
+      }
+      
+      listFiles(dir) {
+        const output = Object.keys(fileSystem).reduce((acc, curr, index) => {
+          const delimiter = index % 3 === 0 && index !== 0 ? '\n' : '\t';
+          return `${acc}${curr}${delimiter}`;
+        }, '');
+        
+        this.addHistory(output);
+      }
+
+      clearInput() { this.elements.input.value = ''; }
+
+      onKeyDown(e) {
+        // Only respond to Enter key presses
+        if (e.keyCode !== ENTER_KEY) return;
+        
+        const inputText = this.elements.input.value;
+        const inputArray = inputText.split(' ');
+        const inputCommand = inputArray[0];
+        const arg = inputArray[1];
+        
+        this.addHistory(`${this.prompt} ${inputText}`);
+        this.clearInput();
+        
+        // If the command line was empty, stop. 
+        if (inputCommand === '') return;
+
+        const command = this.commands[inputCommand];
+        
+        if (command)
+          command(arg);
+        else
+          this.addHistory(`sh: command not found: ${inputCommand}`);
+          
+        this.scrollToBottom();
+      }
+    }
+  </script>
 </body>
 </html>

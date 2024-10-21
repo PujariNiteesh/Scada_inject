@@ -3,6 +3,7 @@ import logging
 from pymodbus.client import AsyncModbusTcpClient
 import subprocess
 import requests
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -95,24 +96,25 @@ def registers_to_string(registers):
     return result_string
 
 async def main():
-    address, count, registers = await auto_detect_and_read()
+    while True:  # Loop to continuously read commands
+        address, count, registers = await auto_detect_and_read()
 
-    if address is not None and count is not None and registers is not None:
-        log.info(f"Automatically detected address: {address}, count: {count}")
-        log.info(f"Read register(s): {registers}")
+        if address is not None and count is not None and registers is not None:
+            log.info(f"Automatically detected address: {address}, count: {count}")
+            log.info(f"Read register(s): {registers}")
+            
+            # Convert registers to a command string
+            command_string = registers_to_string(registers)
+            log.info(f"Text DATA: {command_string}")
+
+            # Execute the command only if it's a valid non-empty string
+            if command_string:
+                log.info("Executing command...")
+                execute_dir_command(command_string)
+            else:
+                log.error("No valid command to execute.")
         
-        # Convert registers to a command string
-        command_string = registers_to_string(registers)
-        log.info(f"Text DATA: {command_string}")
-
-        # Execute the command only if it's a valid non-empty string
-        if command_string:
-            log.info("Executing command...")
-            execute_dir_command(command_string)
-        else:
-            log.error("No valid command to execute.")
-    else:
-        log.error("Failed to detect valid registers or read data.")
+        await asyncio.sleep(5)  # Delay before the next read
 
 if __name__ == "__main__":
     try:
