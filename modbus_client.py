@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 # Modbus server parameters
-MODBUS_SERVER_IP = '127.0.0.1'  # Server IP
+MODBUS_SERVER_IP = '10.211.4.109'  # Server IP
 MODBUS_SERVER_PORT = 5020        # Server Port
 
 async def read_holding_registers(client, address, count):

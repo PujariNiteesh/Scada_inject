@@ -1,56 +1,29 @@
-from flask import Flask, render_template
-from pymodbus.client import AsyncModbusTcpClient
-import asyncio
-import logging
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
-
-# Modbus server parameters
-MODBUS_SERVER_IP = '127.0.0.1'
-MODBUS_SERVER_PORT = 5020
-
-# Asynchronous function to read holding registers
-async def read_holding_registers(address, count):
-    async with AsyncModbusTcpClient(MODBUS_SERVER_IP, port=MODBUS_SERVER_PORT) as client:
-        log.info(f"Connecting to Modbus server at {MODBUS_SERVER_IP}:{MODBUS_SERVER_PORT}")
-        
-        result = await client.read_holding_registers(address, count)
-        
-        if result.isError():
-            log.error(f"Modbus Error: {result}")
-            return None
-        
-        return result.registers
-
-# Synchronous wrapper to call the async function
-def sync_read_holding_registers(address, count):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    return loop.run_until_complete(read_holding_registers(address, count))
-
-def registers_to_string(registers):
-    """Convert the register values to characters and return the resulting string."""
-    characters = [chr(value) for value in registers]  # Use value directly since they are already integers
-    result_string = ''.join(characters)
-    return result_string
+# Store the latest command output to display
+command_output = {"stdout": "", "stderr": ""}
 
 @app.route('/')
 def index():
-    address = 0  # Change to the desired starting address
-    count = 5    # Change to the desired count of registers
-    values = sync_read_holding_registers(address, count)
+    return render_template('index.html', command_output=command_output)
 
-    if values is not None:
-        log.info(f"Read values: {values}")
-        log.info(f"registers_to_string: {registers_to_string(values):}")
+@app.route('/receive_output', methods=['POST'])
+def receive_output():
+    global command_output
+
+    # Get the JSON data from the request
+    output = request.get_json()
+
+    if output:
+        # Update the command output
+        command_output['stdout'] = output.get('stdout', '')
+        command_output['stderr'] = output.get('stderr', '')
+
+        return jsonify({"message": "Command output received successfully"}), 200
     else:
-        log.error("Failed to read registers.")
-    
-    return render_template('index.html', values=values)
+        return jsonify({"message": "Invalid output format"}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
